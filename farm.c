@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "worker.h"
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #define QUI __LINE__,__FILE__
@@ -12,10 +13,12 @@ Programma (multi-thread) che che prende dalla linea di comando
 una lista di file binari e una serie di parametri.
 
 TO DO:
-1) Creazione dei Thread
-2) Creazione corpo della funzione Consumer
-3) Creazione corpo della funzione Producer
-4) Creazione della socket per la comunicazione 
+1) Creazione corpo della funzione Worker
+  1.1) Sistemare logica per quanto riguarda il nome del file
+  1.2) Aggiungere campo nomeFile alla struct
+  1.3) Sistemare eventuali errori nel worker
+  1.4) Creazione della socket per la comunicazione
+2) Creazione corpo della funzione MasterWorker 
 */
 
 
@@ -45,12 +48,15 @@ int main(int argc, char *argv[]){
     }
   }
 
-  pthread_t threads[nThreads];
-  int buff[buffSize];
+  pthread_t *threads = malloc(nThreads * sizeof(pthread_t));
+  if(!threads) termina("Allocazione memoria thread fallito");
+
+  char **buff = malloc(buffSize * sizeof(char *));
+  if(!buff) termina ("Allocazione buffer fallita");
   //Dichiarazione semafori 
-  sem_t sem_free_slots, sem_data_items;
+  sem_t sem_free_slots, sem_data_access;
   xsem_init(&sem_free_slots,0,buffSize,__LINE__,__FILE__);
-  xsem_init(&sem_data_items,0,0,__LINE__,__FILE__);
+  xsem_init(&sem_data_access,0,0,__LINE__,__FILE__);
 
 
   pthread_mutex_t cMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -58,14 +64,16 @@ int main(int argc, char *argv[]){
   tData d;
   d.cIndex = 0;
   d.buffer = buff;
+  d.buffSize = buffSize;
   d.cMutex = &cMutex;
   d.sem_free_slots = &sem_free_slots;
-  d.sem_data_items = &sem_data_items;
+  d.sem_data_access = &sem_data_access;
 
   for(int i = 0; i < nThreads; i++){
-    xpthread_create(&threads[i],NULL,&tbody,&d,QUI);
+    xpthread_create(&threads[i],NULL,&WorkerBody,&d,QUI);
   }
   
-
+  free(buff);
+  free(threads);
 	return 0;
 }

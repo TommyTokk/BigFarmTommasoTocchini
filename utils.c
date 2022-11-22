@@ -3,6 +3,7 @@
 // i prototipi sono in xerrori.h
 
 
+
 // termina un processo con eventuale messaggio d'errore
 void termina(const char *messaggio) {
 	if(errno==0)  fprintf(stderr,"== %d == %s\n",getpid(), messaggio);
@@ -211,6 +212,3 @@ void xperror(int en, char *msg) {
 }
 
 
-void *tbody(void *args){
-  tData *d = (tData *) args;
-}

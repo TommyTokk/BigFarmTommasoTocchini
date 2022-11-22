@@ -14,16 +14,20 @@
 #include <semaphore.h>
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
-#include <fcntl.h>           /* For O_* constants */
+#include <fcntl.h>
+         /* For O_* constants */
 
 typedef struct{
   int cIndex;
-  int *buffer;
+  char **buffer;
+  int *buffSize;
+  int fileName = 266;
   pthread_mutex_t *cMutex;
   sem_t *sem_free_slots;
-  sem_t *sem_data_items;
+  sem_t *sem_data_access;
 }tData;
 
+#define MAX_LONG 50
 // termina programma
 void termina(const char *s); 
 
@@ -55,5 +59,19 @@ int xsem_init(sem_t *sem, int pshared, unsigned int value, int linea, char *file
 int xsem_post(sem_t *sem, int linea, char *file);
 int xsem_wait(sem_t *sem, int linea, char *file);
 
-//Utils functions
-void *tbody(void *args);
+
+// thread
+void xperror(int en, char *msg);
+
+int xpthread_create(pthread_t *thread, const pthread_attr_t *attr,
+                          void *(*start_routine) (void *), void *arg, int linea, char *file);
+int xpthread_join(pthread_t thread, void **retval, int linea, char *file);
+
+// mutex 
+int xpthread_mutex_init(pthread_mutex_t *restrict mutex, const pthread_mutexattr_t *restrict attr, int linea, char *file);
+int xpthread_mutex_destroy(pthread_mutex_t *mutex, int linea, char *file);
+int xpthread_mutex_lock(pthread_mutex_t *mutex, int linea, char *file);
+int xpthread_mutex_unlock(pthread_mutex_t *mutex, int linea, char *file);
+
+
+
