@@ -12,9 +12,9 @@ TODO Worker
   1.2) Aggiungere controlli sulla correttezza della lunghezza del buffer 
   1.3) Aggiungere funzione per inviare i warning 
 2) Connessione tramite socket per lo scambio di dati
-  2.1) Aggiungere creazione della socket per la connessione
-  2.2) Aggiungere logica per lo scambio dati
-  2.3) Aggiungere controllo degli errori
+  2.1) Aggiungere logica per lo scambio dati
+  2.2) Aggiungere controllo degli errori
+3) Gestire il segnale SIGINT
 */
 
 
@@ -67,7 +67,15 @@ void *WorkerBody(void *args){
     /*ATTENZIONE DA SISTEMARE*/
 
     //CREARE LA SOCKET PER LA COMUNICAZIONE
-     //if(!connectionCreate()) termina("Errore creazione socket");
+    struct sockaddr_in serverAddress;
+
+    int socket = connectionCreate(serverAddress, PORT, HOST, __LINE__, __FILE__);
+
+    if(socket < 0){
+      free(fd);
+      free(arrNumR);
+      pthread_exit(NULL);
+    }
     //INVIO DATI DALLA SOCKET
   }while(true);
 }

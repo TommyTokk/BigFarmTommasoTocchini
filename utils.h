@@ -15,7 +15,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>
-         /* For O_* constants */
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 typedef struct{
   int cIndex;
@@ -27,7 +28,7 @@ typedef struct{
   sem_t *sem_data_access;
 }tData;
 
-#define MAX_LONG 50
+#define MAX_LONG 100
 // termina programma
 void termina(const char *s); 
 
@@ -75,4 +76,4 @@ int xpthread_mutex_unlock(pthread_mutex_t *mutex, int linea, char *file);
 
 
 //Funzione per la connessione con socket
-bool connectionCreate(int *fdSocket, struct sockaddr_in serverAddress, int port, char* host);
+int connectionCreate(struct sockaddr_in serverAddress, int PORT, char* HOST, int line, char *fileErr);

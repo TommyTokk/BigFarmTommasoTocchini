@@ -211,4 +211,24 @@ void xperror(int en, char *msg) {
     fprintf(stderr,"%s\n",errmsg);
 }
 
+//Funzione che crea la connessione alla socket
+int connectionCreate(struct sockaddr_in serverAddress, int PORT, char *HOST, int line, char *fileErr){
+  int fdSk = 0;
+  if ((fdSk = socket(AF_INET, SOCK_STREAM, 0)) < 0){
+    perror("Creazione socket fallita");
+    fprintf(stderr,"== %d == Linea: %d, File: %s\n",getpid(),line,fileErr);
+    return -1;
+  }
 
+  serverAddress.sin_family = AF_INET;
+  serverAddress.sin_port = htons(PORT);//Converto il tipo della porta in network order
+  serverAddress.sin_addr.s_addr = inet_addr(HOST);
+
+  if (connect(fdSk, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0){ //apro la connessione
+    perror("Apertura connessione fallita");
+    fprintf(stderr,"== %d == Linea: %d, File: %s\n",getpid(),line,fileErr);
+    return -1;
+  }
+
+  return fdSk;
+}

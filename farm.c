@@ -15,10 +15,10 @@ una lista di file binari e una serie di parametri.
 TO DO:
 1) Creazione corpo della funzione Worker
   1.1) Sistemare logica per quanto riguarda il nome del file
-  1.2) Aggiungere campo nomeFile alla struct
-  1.3) Sistemare eventuali errori nel worker
-  1.4) Creazione della socket per la comunicazione
+  1.2) Sistemare eventuali errori nel worker
+  1.3) Creazione della socket per la comunicazione
 2) Creazione corpo della funzione MasterWorker 
+3) Gestire il comando SIGINT
 */
 
 
