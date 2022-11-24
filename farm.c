@@ -66,6 +66,7 @@ int main(int argc, char *argv[]){
   d.buffer = buff;
   d.buffSize = buffSize;
   d.cMutex = &cMutex;
+  d.fileName = 266;
   d.sem_free_slots = &sem_free_slots;
   d.sem_data_access = &sem_data_access;
 

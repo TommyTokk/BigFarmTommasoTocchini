@@ -21,7 +21,7 @@ typedef struct{
   int cIndex;
   char **buffer;
   int *buffSize;
-  int fileName = 266;
+  int fileName;
   pthread_mutex_t *cMutex;
   sem_t *sem_free_slots;
   sem_t *sem_data_access;
@@ -74,4 +74,5 @@ int xpthread_mutex_lock(pthread_mutex_t *mutex, int linea, char *file);
 int xpthread_mutex_unlock(pthread_mutex_t *mutex, int linea, char *file);
 
 
-
+//Funzione per la connessione con socket
+bool connectionCreate(int *fdSocket, struct sockaddr_in serverAddress, int port, char* host);
