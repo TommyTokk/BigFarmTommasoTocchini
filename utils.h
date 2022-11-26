@@ -75,5 +75,8 @@ int xpthread_mutex_lock(pthread_mutex_t *mutex, int linea, char *file);
 int xpthread_mutex_unlock(pthread_mutex_t *mutex, int linea, char *file);
 
 
+//Funzioni farm
+
+
 //Funzione per la connessione con socket
 int connectionCreate(struct sockaddr_in serverAddress, int PORT, char* HOST, int line, char *fileErr);

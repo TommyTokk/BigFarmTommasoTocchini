@@ -32,7 +32,14 @@ int main(int argc, char *argv[]){
       return 1;
   }
 
+  /*
+  Variabile usata per controllare se l'argomento
+  in argv è un file
+  */
+  struct stat filePath;
+
   int nThreads, buffSize, delay, opt = 0;
+  int pIndex = 0;
 
   while ((opt = getopt(argc, argv, "n:q:t:")) != -1){
     switch (opt){
@@ -61,17 +68,28 @@ int main(int argc, char *argv[]){
 
   pthread_mutex_t cMutex = PTHREAD_MUTEX_INITIALIZER;
 
-  tData d;
-  d.cIndex = 0;
-  d.buffer = buff;
-  d.buffSize = buffSize;
-  d.cMutex = &cMutex;
-  d.fileName = 266;
-  d.sem_free_slots = &sem_free_slots;
-  d.sem_data_access = &sem_data_access;
-
+  tData d[nThreads];
+  
+  //Creazione dei threads
   for(int i = 0; i < nThreads; i++){
-    xpthread_create(&threads[i],NULL,&WorkerBody,&d,QUI);
+    d[i].cIndex = 0;
+    d[i].buffer = buff;
+    d[i].buffSize = buffSize;
+    d[i].cMutex = &cMutex;
+    d[i].fileName = 266;
+    d[i].sem_free_slots = &sem_free_slots;
+    d[i].sem_data_access = &sem_data_access;
+
+    xpthread_create(&threads[i],NULL,&WorkerBody,d+i,QUI);
+  }
+
+  for(int i = 1; i < argc; i++){
+    if(stat(argv[i], &filePath) == -1)continue;//L'argomento non è un file
+    //Se argv[i] è un file lo carico nel buffer
+    xsem_wait(&sem_free_slots, __LINE__, __FILE__);
+    buff[pIndex++ % buffSize]= argv[i];
+    xsem_post(&sem_data_access, __LINE__,__FILE__);
+    usleep(delay*1000);
   }
   
   free(buff);

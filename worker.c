@@ -62,6 +62,8 @@ void *WorkerBody(void *args){
         sum += i + arrNumR[i];
       }
     }
+
+    printf("La somma è: %ld\n", sum);
     /*ATTENZIONE DA SISTEMARE*/
     if(fclose(fin) != 0) termina("Errore chiusura file input consumer");
     /*ATTENZIONE DA SISTEMARE*/
@@ -72,7 +74,7 @@ void *WorkerBody(void *args){
     int socket = connectionCreate(serverAddress, PORT, HOST, __LINE__, __FILE__);
 
     if(socket < 0){
-      free(fd);
+      free(fd); 
       free(arrNumR);
       pthread_exit(NULL);
     }
