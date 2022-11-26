@@ -1,6 +1,4 @@
 #include "worker.h"
-#include <arpa/inet.h>
-#include <sys/socket.h>
 
 
 #define HOST "127.0.0.1"
@@ -14,16 +12,15 @@ TODO Worker
 2) Connessione tramite socket per lo scambio di dati
   2.1) Aggiungere logica per lo scambio dati
   2.2) Aggiungere controllo degli errori
-3) Gestire il segnale SIGINT
 */
 
 
 
 void *WorkerBody(void *args){
-  tData *d = (tData *) args;
-  char *fd = malloc(d -> fileName);
+  Data *d = (Data *) args;
+  char *fName = malloc(d -> fileName);
 
-  if(!fd) termina("Allocazione memoria nome file fallita");
+  if(!fName) termina("Allocazione memoria nome file fallita");
 
   long *arrNumR = malloc(MAX_LONG * sizeof(long));
 
@@ -31,25 +28,25 @@ void *WorkerBody(void *args){
 
   long numRead, sum;
 
-  do{
+  while(true){
     xsem_wait(d -> sem_data_access,__LINE__, __FILE__);//Eseguo la wait sul semaforo per l'accesso ai dati
     xpthread_mutex_lock(d ->cMutex, __LINE__, __FILE__);//Eseguo la lock sulla mutex
 
-    if(!(d -> buffer[d -> cIndex])){
-      free(fd);
-      fd = NULL;
+    if(!(d -> buffer[*(d -> cIndex)])){
+      free(fName);
+      fName = NULL;
     }else
       //ATTENZIONE ALLA DIMENSIONE DEL BUFFER
-      strcpy(fd, d -> buffer[d -> cIndex % *(d -> buffSize)]);
+      strcpy(fName, d -> buffer[*(d -> cIndex) % *(d -> buffSize)]);
       //ATTENZIONE ALLA DIMENSIONE DEL BUFFER
     (d -> cIndex) += 1;
 
     xpthread_mutex_unlock(d -> cMutex, __LINE__, __FILE__);//Rilascio la mutex
     xsem_post(d -> sem_free_slots, __LINE__, __FILE__);//Eseguo la post per incrementare il semaforo degli slot liberi
 
-    if(!fd) break;
+    if(!fName) break;
 
-    FILE *fin = xfopen(fd, "r", __LINE__, __FILE__);
+    FILE *fin = xfopen(fName, "r", __LINE__, __FILE__);
 
     /*ATTENZIONE DA SISTEMARE*/
     if(fin == NULL) termina("Apertura file di input per consumer fallita");
@@ -59,11 +56,11 @@ void *WorkerBody(void *args){
     while(!feof(fin)){
       numRead = fread(arrNumR, sizeof(long),MAX_LONG,fin); //Leggo i long dal file e gli inserisco in arrNumR
       for(int i = 0; i < numRead; i++){
-        sum += i + arrNumR[i];
+        sum += i * arrNumR[i];
       }
+      //d -> sommaTot += sum;
     }
 
-    printf("La somma è: %ld\n", sum);
     /*ATTENZIONE DA SISTEMARE*/
     if(fclose(fin) != 0) termina("Errore chiusura file input consumer");
     /*ATTENZIONE DA SISTEMARE*/
@@ -74,10 +71,13 @@ void *WorkerBody(void *args){
     int socket = connectionCreate(serverAddress, PORT, HOST, __LINE__, __FILE__);
 
     if(socket < 0){
-      free(fd); 
+      free(fName); 
       free(arrNumR);
       pthread_exit(NULL);
     }
     //INVIO DATI DALLA SOCKET
-  }while(true);
+    
+  }
+
+  pthread_exit(NULL);
 }

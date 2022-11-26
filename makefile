@@ -5,11 +5,13 @@ CFLAGS=-g -Wall -O -std=gnu99
 LDLIBS=-lm -lrt -pthread
 
 EXEC = farm
+WORKER = worker
+LIB = utils
 
 # Se scriviamo solo make, verrà compilato di defult main
 all: ${EXEC}
 
-${EXEC}: ${EXEC}.o utils.o
+${EXEC}: ${EXEC}.o ${LIB}.o ${WORKER}.o
 
 
 clean:

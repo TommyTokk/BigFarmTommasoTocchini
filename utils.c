@@ -1,6 +1,6 @@
 #include "utils.h"
 // collezione di chiamate a funzioni di sistema con controllo output
-// i prototipi sono in xerrori.h
+
 
 
 
@@ -198,10 +198,7 @@ int xsem_wait(sem_t *sem, int linea, char *file) {
 
 // ----- thread (non scrivono il codice d'errore in errno)
 #define Buflen 100
-
-
-// stampa il messaggio d'errore associato al codice en in maniera simile a perror
-void xperror(int en, char *msg) {
+void xperror(int en, char *msg){
   char buf[Buflen];
   
   char *errmsg = strerror_r(en, buf, Buflen);
@@ -210,6 +207,73 @@ void xperror(int en, char *msg) {
   else
     fprintf(stderr,"%s\n",errmsg);
 }
+
+
+int xpthread_create(pthread_t *thread, const pthread_attr_t *attr,
+                          void *(*start_routine) (void *), void *arg, int linea, char *file) {
+  int e = pthread_create(thread, attr, start_routine, arg);
+  if (e!=0) {
+    xperror(e, "Errore pthread_create");
+    fprintf(stderr,"== %d == Linea: %d, File: %s\n",getpid(),linea,file);
+    pthread_exit(NULL);
+  }
+  return e;                       
+}
+
+                          
+int xpthread_join(pthread_t thread, void **retval, int linea, char *file) {
+  int e = pthread_join(thread, retval);
+  if (e!=0) {
+    xperror(e, "Errore pthread_join");
+    fprintf(stderr,"== %d == Linea: %d, File: %s\n",getpid(),linea,file);
+    pthread_exit(NULL);
+  }
+  return e;
+}
+
+
+// mutex 
+int xpthread_mutex_init(pthread_mutex_t *restrict mutex, const pthread_mutexattr_t *restrict attr, int linea, char *file) {
+  int e = pthread_mutex_init(mutex, attr);
+  if (e!=0) {
+    xperror(e, "Errore pthread_mutex_init");
+    fprintf(stderr,"== %d == Linea: %d, File: %s\n",getpid(),linea,file);
+    pthread_exit(NULL);
+  }  
+  return e;
+}
+
+int xpthread_mutex_destroy(pthread_mutex_t *mutex, int linea, char *file) {
+  int e = pthread_mutex_destroy(mutex);
+  if (e!=0) {
+    xperror(e, "Errore pthread_mutex_destroy");
+    fprintf(stderr,"== %d == Linea: %d, File: %s\n",getpid(),linea,file);
+    pthread_exit(NULL);
+  }
+  return e;
+}
+
+int xpthread_mutex_lock(pthread_mutex_t *mutex, int linea, char *file) {
+  int e = pthread_mutex_lock(mutex);
+  if (e!=0) {
+    xperror(e, "Errore pthread_mutex_lock");
+    fprintf(stderr,"== %d == Linea: %d, File: %s\n",getpid(),linea,file);
+    pthread_exit(NULL);
+  }
+  return e;
+}
+
+int xpthread_mutex_unlock(pthread_mutex_t *mutex, int linea, char *file) {
+  int e = pthread_mutex_unlock(mutex);
+  if (e!=0) {
+    xperror(e, "Errore pthread_mutex_unlock");
+    fprintf(stderr,"== %d == Linea: %d, File: %s\n",getpid(),linea,file);
+    pthread_exit(NULL);
+  }
+  return e;
+}
+
+
 
 //Funzione che crea la connessione alla socket
 int connectionCreate(struct sockaddr_in serverAddress, int PORT, char *HOST, int line, char *fileErr){
