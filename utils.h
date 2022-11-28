@@ -19,10 +19,11 @@
 #include <sys/socket.h>
 
 
-
 #define MAX_LONG 100
+#define LONG_MASK 0x00000000ffffffff
+
 // termina programma
-void termina(const char *s); 
+void termina(const char *s, int linea, char *file); 
 
 // operazioni su FILE *
 FILE *xfopen(const char *path, const char *mode, int linea, char *file);
@@ -67,6 +68,14 @@ int xpthread_mutex_lock(pthread_mutex_t *mutex, int linea, char *file);
 int xpthread_mutex_unlock(pthread_mutex_t *mutex, int linea, char *file);
 //Funzioni farm
 
+ssize_t readn(int fd, void *ptr, size_t n);
+ssize_t writen(int fd, void *ptr, size_t n);
 
 //Funzione per la connessione con socket
 int connectionCreate(struct sockaddr_in serverAddress, int PORT, char* HOST, int line, char *fileErr);
+int sendInt(int fdSocket, int n);
+int sendLong(int fdSocket, long num);
+int sendFileName(int fdSocket, char *fileName);
+int reciveInt(int fdSocket, int *num);
+int reciveLong(int fdSocket, long *num);
+

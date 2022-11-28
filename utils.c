@@ -5,8 +5,8 @@
 
 
 // termina un processo con eventuale messaggio d'errore
-void termina(const char *messaggio) {
-	if(errno==0)  fprintf(stderr,"== %d == %s\n",getpid(), messaggio);
+void termina(const char *messaggio, int linea, char *file) {
+	if(errno==0)  fprintf(stderr,"== %d == %s Linea:%d, File: %s\n",getpid(), messaggio, linea, file);
 	else fprintf(stderr,"== %d == %s: %s\n",getpid(), messaggio,
               strerror(errno));
   exit(1);
@@ -273,6 +273,39 @@ int xpthread_mutex_unlock(pthread_mutex_t *mutex, int linea, char *file) {
   return e;
 }
 
+ssize_t readn(int fd, void *ptr, size_t n) {  
+   size_t   nleft;
+   ssize_t  nread;
+ 
+   nleft = n;
+   while (nleft > 0) {
+     if((nread = read(fd, ptr, nleft)) < 0) {
+        if (nleft == n) return -1; /* error, return -1 */
+        else break; /* error, return amount read so far */
+     } else if (nread == 0) break; /* EOF */
+     nleft -= nread;
+     ptr   += nread;
+   }
+   return(n - nleft); /* return >= 0 */
+}
+
+
+/* Write "n" bytes to a descriptor */
+ssize_t writen(int fd, void *ptr, size_t n) {  
+   size_t   nleft;
+   ssize_t  nwritten;
+ 
+   nleft = n;
+   while (nleft > 0) {
+     if((nwritten = write(fd, ptr, nleft)) < 0) {
+        if (nleft == n) return -1; /* error, return -1 */
+        else break; /* error, return amount written so far */
+     } else if (nwritten == 0) break; 
+     nleft -= nwritten;
+     ptr   += nwritten;
+   }
+   return(n - nleft); /* return >= 0 */
+}
 
 
 //Funzione che crea la connessione alla socket
@@ -295,4 +328,117 @@ int connectionCreate(struct sockaddr_in serverAddress, int PORT, char *HOST, int
   }
 
   return fdSk;
+}
+
+int sendInt(int fdSocket, int n){
+  int e;
+  int num = htonl(n);
+
+  e = writen(fdSocket, &num, sizeof(int));
+  if(e == -1) termina("Errore writen", __LINE__, __FILE__);
+  if(e != sizeof(int)){
+    fprintf(stderr, "Errore writen in linea:%d, file:%s", __LINE__, __FILE__);
+    return -1;
+  }
+
+  return 1;
+}
+
+int sendLong(int fdSocket, long num){
+  //Invio il long in due int separati
+  int e;
+  int lSBit = num, mSBit = num >> 32;
+
+  mSBit = htonl(mSBit);
+  e = writen(fdSocket, &mSBit, sizeof(int));
+  if(e == -1) termina("Errore writen", __LINE__, __FILE__);
+  if(e != sizeof(int)){
+    printf(stderr, "Errore writen, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
+
+  lSBit = htonl(lSBit);
+  e = writen(fdSocket, &lSBit, sizeof(int));
+  if(e == -1) termina("Errore writen", __LINE__, __FILE__);
+  if(e != sizeof(int)){
+    printf(stderr, "Errore writen, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
+
+  return 1;
+}
+
+int sendFileName(int fdSocket, char *fileName){
+  int e, len;
+
+  if(!fileName){
+    printf(stderr, "Invio stringa fallito. nome file inesistente, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
+
+  len = strlen(fileName);
+  e = writen(fdSocket, fileName, len);
+
+  if(e == -1) termina("Errore invio nome del file", __LINE__, __FILE__);
+  if(e != len){
+    printf(stderr, "Invio nome file fallito, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
+
+  return 1;
+}
+
+int reciveInt(int fdSocket, int *num){
+  int e;
+  e = readn(fdSocket, num, sizeof(int));
+
+  if(e == -1) termina("Errore readn", __LINE__, __FILE__);
+  if(e != sizeof(int)){
+    fprintf(stderr, "Errore readn, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
+
+  *num = ntonl(*num);
+  return 1;
+}
+
+int reciveLong(int fdSocket, long *num){
+  int e, lSBit, mSbit;
+
+  e = readn(fdSocket, &mSbit, sizeof(int));
+  if(e == -1) termina("Errore readn", __LINE__, __FILE__);
+  if(e != sizeof(int)){
+    fprintf(stderr, "Errore readn, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
+  mSbit = ntohl(mSbit);
+
+  e = readn(fdSocket, &lSBit, sizeof(int));
+  if(e == -1) termina("Errore readn", __LINE__, __FILE__);
+  if(e != sizeof(int)){
+    fprintf(stderr, "Errore readn, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
+
+  lSBit = ntohl(lSBit);
+  *num = ((long)mSbit << 32) + (lSBit & LONG_MASK);
+
+  return 1;
+}
+
+int reciveFileName(int fdSocket, char *str){
+  int e, len;
+
+  if(!str){
+    fprintf(stderr, "Lettura stringa non riuscita, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
+  len = strlen(str);
+  e = readn(fdSocket, str, len);
+  
+  if(e == -1) termina("Lettura nome file fallita", __LINE__, __FILE__);
+  if(e != len){
+    fprintf(stderr, "Errore readn, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    return -1;
+  }
 }

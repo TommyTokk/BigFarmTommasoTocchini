@@ -2,7 +2,7 @@
 
 
 #define HOST "127.0.0.1"
-#define PORT 65432
+#define PORT 61813
 /*
 TODO Worker
 1) Logica per la lettura del nome del file
@@ -20,11 +20,11 @@ void *WorkerBody(void *args){
   Data *d = (Data *) args;
   char *fName = malloc(d -> fileName);
 
-  if(!fName) termina("Allocazione memoria nome file fallita");
+  if(!fName) termina("Allocazione memoria nome file fallita", __LINE__, __FILE__);
 
   long *arrNumR = malloc(MAX_LONG * sizeof(long));
 
-  if(!arrNumR) termina("Errore allocazione memoria arrNumR");
+  if(!arrNumR) termina("Errore allocazione memoria arrNumR", __LINE__, __FILE__);
 
   long numRead, sum;
 
@@ -49,7 +49,7 @@ void *WorkerBody(void *args){
     FILE *fin = xfopen(fName, "r", __LINE__, __FILE__);
 
     /*ATTENZIONE DA SISTEMARE*/
-    if(fin == NULL) termina("Apertura file di input per consumer fallita");
+    if(fin == NULL) termina("Apertura file di input per consumer fallita", __LINE__, __FILE__);
     /*ATTENZIONE DA SISTEMARE*/
 
     sum = 0;
@@ -62,7 +62,7 @@ void *WorkerBody(void *args){
     }
 
     /*ATTENZIONE DA SISTEMARE*/
-    if(fclose(fin) != 0) termina("Errore chiusura file input consumer");
+    if(fclose(fin) != 0) termina("Errore chiusura file input consumer", __LINE__, __FILE__);
     /*ATTENZIONE DA SISTEMARE*/
 
     //CREARE LA SOCKET PER LA COMUNICAZIONE
@@ -76,6 +76,37 @@ void *WorkerBody(void *args){
       pthread_exit(NULL);
     }
     //INVIO DATI DALLA SOCKET
+
+    //Invio il tipo di richiesta al collector
+    if(sendInt(socket, 0) < 0){
+      free(fName);
+      free(arrNumR);
+      pthread_exit(NULL);
+    }
+
+    //Invio la somma al collector
+    //Siccome potrebbe non essere possibile inviare il long intero
+    //Lo spezzo in due int
+    if(sendLong(socket, sum) < 0){
+      free(fName);
+      free(arrNumR);
+      pthread_exit(NULL);
+    }
+
+    int lenFileName = strlen(fName);
+    assert(lenFileName > 0);
+    //Invio al collector la lunghezza del nome del file
+    if(sendInt(socket, lenFileName) < 0){
+      free(fName);
+      free(arrNumR);
+      pthread_exit(NULL);
+    }
+
+    if(sendFileName(socket, fName) < 0 ){
+      free(fName);
+      free(arrNumR);
+      pthread_exit(NULL);
+    }
     
   }
 

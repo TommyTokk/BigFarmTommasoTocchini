@@ -4,7 +4,7 @@
 
 // parametri del server
 #define HOST "127.0.0.1"
-#define PORT 65432
+#define PORT 61813
 
 /*
 Programma (multi-thread) che che prende dalla linea di comando
@@ -70,10 +70,10 @@ int main(int argc, char *argv[]){
 
   pthread_t *threads;
   threads = malloc(nThreads * sizeof(pthread_t));
-  if(!threads) termina("Allocazione memoria thread fallito");
+  if(!threads) termina("Allocazione memoria thread fallito", __LINE__, __FILE__);
 
   char **buff = malloc(buffSize * sizeof(char *));
-  if(!buff) termina ("Allocazione buffer fallita");
+  if(!buff) termina ("Allocazione buffer fallita", __LINE__, __FILE__);
   //Dichiarazione semafori 
   sem_t sem_free_slots, sem_data_access;
   xsem_init(&sem_free_slots,0,buffSize,__LINE__,__FILE__);
@@ -82,20 +82,20 @@ int main(int argc, char *argv[]){
 
   pthread_mutex_t cMutex = PTHREAD_MUTEX_INITIALIZER;
 
-  Data d[nThreads];
+  Data d;
+
+  d.cIndex = &cIndex;
+  d.buffer = buff;
+  d.buffSize = &buffSize;
+  d.fileName = 266;
+  d.cMutex = &cMutex;
+  d.sem_free_slots = &sem_free_slots;
+  d.sem_data_access = &sem_data_access;
  
   //Creazione dei threads
   for(int i = 0; i < nThreads; i++){
     //d[i].sommaTot = 0;
-    d[i].cIndex = &cIndex;
-    d[i].buffer = buff;
-    d[i].buffSize = &buffSize;
-    d[i].fileName = 266;
-    d[i].cMutex = &cMutex;
-    d[i].sem_free_slots = &sem_free_slots;
-    d[i].sem_data_access = &sem_data_access;
-
-    xpthread_create(&threads[i],NULL,WorkerBody,d+i,__LINE__, __FILE__);
+    xpthread_create(&threads[i],NULL,WorkerBody,&d,__LINE__, __FILE__);
   }
 
   for(int i = 1; i < argc; i++){
