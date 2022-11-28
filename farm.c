@@ -68,6 +68,8 @@ int main(int argc, char *argv[]){
     }
   }
 
+  printf("nThreads = %d, buffSize = %d, delay = %d\n", nThreads, buffSize, delay);
+
   pthread_t *threads;
   threads = malloc(nThreads * sizeof(pthread_t));
   if(!threads) termina("Allocazione memoria thread fallito", __LINE__, __FILE__);
@@ -104,9 +106,7 @@ int main(int argc, char *argv[]){
       continue;//L'argomento non è un file
     }
     //Se argv[i] è un file lo carico nel buffer
-    printf("%s\n", argv[i]);
     xsem_wait(&sem_free_slots, __LINE__, __FILE__);
-    printf("Sto scrivendo: %s", argv[i]);
     buff[pIndex++ % buffSize] = argv[i];
     xsem_post(&sem_data_access, __LINE__,__FILE__);
     usleep(delay*1000);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]){
   //termino i threads
   for(int i = 0; i < nThreads; i++){
     xsem_wait(&sem_free_slots, __LINE__, __FILE__);
-    buff[pIndex++ % buffSize] = NULL; //Inserisco un valore non valido per il consumatore
+    buff[(pIndex++) % buffSize] = NULL; //Inserisco un valore non valido per il consumatore
     xsem_post(&sem_data_access, __LINE__, __FILE__);
   }
   

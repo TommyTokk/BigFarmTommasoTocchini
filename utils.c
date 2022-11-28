@@ -353,7 +353,7 @@ int sendLong(int fdSocket, long num){
   e = writen(fdSocket, &mSBit, sizeof(int));
   if(e == -1) termina("Errore writen", __LINE__, __FILE__);
   if(e != sizeof(int)){
-    printf(stderr, "Errore writen, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    fprintf(stderr, "Errore writen, Linea:%d, File: %s\n", __LINE__, __FILE__);
     return -1;
   }
 
@@ -361,7 +361,7 @@ int sendLong(int fdSocket, long num){
   e = writen(fdSocket, &lSBit, sizeof(int));
   if(e == -1) termina("Errore writen", __LINE__, __FILE__);
   if(e != sizeof(int)){
-    printf(stderr, "Errore writen, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    fprintf(stderr, "Errore writen, Linea:%d, File: %s\n", __LINE__, __FILE__);
     return -1;
   }
 
@@ -372,7 +372,7 @@ int sendFileName(int fdSocket, char *fileName){
   int e, len;
 
   if(!fileName){
-    printf(stderr, "Invio stringa fallito. nome file inesistente, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    fprintf(stderr, "Invio stringa fallito. nome file inesistente, Linea:%d, File: %s\n", __LINE__, __FILE__);
     return -1;
   }
 
@@ -381,7 +381,7 @@ int sendFileName(int fdSocket, char *fileName){
 
   if(e == -1) termina("Errore invio nome del file", __LINE__, __FILE__);
   if(e != len){
-    printf(stderr, "Invio nome file fallito, Linea:%d, File: %s\n", __LINE__, __FILE__);
+    fprintf(stderr, "Invio nome file fallito, Linea:%d, File: %s\n", __LINE__, __FILE__);
     return -1;
   }
 
@@ -398,7 +398,7 @@ int reciveInt(int fdSocket, int *num){
     return -1;
   }
 
-  *num = ntonl(*num);
+  *num = ntohl(*num);
   return 1;
 }
 
@@ -441,4 +441,21 @@ int reciveFileName(int fdSocket, char *str){
     fprintf(stderr, "Errore readn, Linea:%d, File: %s\n", __LINE__, __FILE__);
     return -1;
   }
+  return 1;
+}
+
+//FUNZIONI CLIENT
+long xstrtol(const char *nptr, char **endptr, int base, int linea, char *file){
+    long res = strtol(nptr, endptr,base);
+
+    if(res == 0){
+      if (errno == EINVAL)//Errore durante la conversione
+        termina("Errore durante la conversione str --> long, LINEA : %d, FILE: %s\n", linea, file);
+    }
+
+    if(res == LONG_MIN || res == LONG_MAX){
+      if(errno == ERANGE) fprintf(stderr, "Valore out of bound, LINEA: %d, FILE: %s", linea, file);
+    }
+
+    return res;
 }

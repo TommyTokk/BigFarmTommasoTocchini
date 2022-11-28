@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <limits.h>
 
 
 #define MAX_LONG 100
@@ -79,3 +80,6 @@ int sendFileName(int fdSocket, char *fileName);
 int reciveInt(int fdSocket, int *num);
 int reciveLong(int fdSocket, long *num);
 
+
+//FUNZIONI CLIENT
+long xstrtol(const char *nptr, char **endptr, int base, int linea, char *file);

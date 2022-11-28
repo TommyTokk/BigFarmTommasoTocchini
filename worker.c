@@ -35,11 +35,15 @@ void *WorkerBody(void *args){
     if(!(d -> buffer[*(d -> cIndex)])){
       free(fName);
       fName = NULL;
-    }else
+    }else{
       //ATTENZIONE ALLA DIMENSIONE DEL BUFFER
-      strcpy(fName, d -> buffer[*(d -> cIndex) % *(d -> buffSize)]);
+      strcpy(fName, d -> buffer[*(d -> cIndex)]);
+      
+      printf("Ho letto %s come nome file\n", fName);
       //ATTENZIONE ALLA DIMENSIONE DEL BUFFER
-    (d -> cIndex) += 1;
+
+    }
+    *(d -> cIndex) = (*(d -> cIndex) + 1) % *(d -> buffSize);
 
     xpthread_mutex_unlock(d -> cMutex, __LINE__, __FILE__);//Rilascio la mutex
     xsem_post(d -> sem_free_slots, __LINE__, __FILE__);//Eseguo la post per incrementare il semaforo degli slot liberi
@@ -67,7 +71,7 @@ void *WorkerBody(void *args){
 
     //CREARE LA SOCKET PER LA COMUNICAZIONE
     struct sockaddr_in serverAddress;
-
+    printf("il nome del file è %s\n", fName);
     int socket = connectionCreate(serverAddress, PORT, HOST, __LINE__, __FILE__);
 
     if(socket < 0){
@@ -107,8 +111,9 @@ void *WorkerBody(void *args){
       free(arrNumR);
       pthread_exit(NULL);
     }
-    
+    if(close(socket)<0) perror("Errore chiusura socket");
   }
 
-  pthread_exit(NULL);
+    free(arrNumR);
+    pthread_exit(NULL);
 }

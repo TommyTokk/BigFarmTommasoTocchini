@@ -6,13 +6,15 @@ LDLIBS=-lm -lrt -pthread
 
 EXEC = farm
 WORKER = worker
+CLIENT = client
 LIB = utils
 
 # Se scriviamo solo make, verrà compilato di defult main
 all: ${EXEC}
 
-${EXEC}: ${EXEC}.o ${LIB}.o ${WORKER}.o
+${EXEC}: ${EXEC}.o ${LIB}.o ${WORKER}.o 
+$(CLIENT): $(CLIENT).o $(LIB).o
 
 
 clean:
-	rm -f  ${EXEC} *.o
+	rm -f  ${EXEC} ${CLIENT} *.o
