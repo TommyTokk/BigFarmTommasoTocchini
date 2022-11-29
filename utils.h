@@ -83,3 +83,4 @@ int reciveLong(int fdSocket, long *num);
 
 //FUNZIONI CLIENT
 long xstrtol(const char *nptr, char **endptr, int base, int linea, char *file);
+void stampaArrayFile(char **arrayFile, int nFiles, long key);

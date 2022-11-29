@@ -40,7 +40,7 @@ def connectionHandler(conn, addr, dict):
         req = s.unpack("!i", data[:4])[0]
         print(f"ho ricevuto {req} come tipo di richiesta da {addr}\n")
 
-        if(req == 0):
+        if(req == 1):
             #Richiesta di un worker per l'invio della somma e del nomeFile
             #Ricevo la somma 
             data = recv_all(conn, 8)
@@ -67,29 +67,6 @@ def connectionHandler(conn, addr, dict):
                 else:
                     dict[lSum] = list()
                     dict[lSum].append(fileName)
-        elif req == 1:
-            #Al collector arriva la richiesta di elencare tutte le coppie
-            with mutex:
-                #Devo inviare il numero di chiavi nel dict
-                dict.sort()
-                nKeys = len(dict.keys())
-                conn.sendall(s.pack("!i", nKeys))
-
-                if(nKeys != 0):
-                    for keys in dict:
-                        fileList = dict[keys].sort()
-
-                        #Invio la chiave
-                        conn.sendall(s.pack("!q", keys))
-
-                        #Invio i numero di file associati a key
-                        conn.sendall(s.pack("!i"), len(fileList))
-
-                        for file in fileList:
-                            #Invio la lunghezza del nome del file
-                            conn.sendall(s.pack("!", len(file)))
-                            #Invio i file associati alla chiave
-                            conn.sendall(file.encode())
         elif req == 2:
             #Al collector arriva la richiesta di elencare i fie con una det. somma
             #Ricevo la somma
@@ -106,9 +83,38 @@ def connectionHandler(conn, addr, dict):
                     for file in fileList:
                         #Invio la lunghezza del nome del file
                         conn.sendall(s.pack("!i", len(file)))
+                        #Invio il file
                         conn.sendall(file.encode())
                 except:
                     conn.sendall(s.pack("!i", 0))
+        elif req == 3:
+            #Al collector arriva la richiesta di elencare tutte le coppie
+            with mutex:
+                #Devo inviare il numero di chiavi nel dict
+                dict = {k: v for k, v in sorted(dict.items(), key=lambda item: item[1])}
+                print(dict)
+                nKeys = len(dict.keys())
+                print(f"Key number: {nKeys}\n")
+                conn.sendall(s.pack("!i", nKeys))
+
+                if(nKeys != 0):
+                    for keys in dict:
+                        print(f"Key: {keys}")
+                        fileList = list(dict.keys())
+                        print(f"File list: {fileList}\n")
+                        print(f'Chiave: {keys}, File List: {fileList}, List length: {len(fileList)}\n')
+
+                        #Invio la chiave
+                        conn.sendall(s.pack("!q", keys))
+
+                        #Invio il numero di file associati a key
+                        conn.sendall(s.pack("!i", len(fileList)))
+
+                        for file in fileList:
+                            #Invio la lunghezza del nome del file
+                            conn.sendall(s.pack("!", len(file)))
+                            #Invio i file associati alla chiave
+                            conn.sendall(file.encode())
 
 def recv_all(conn,n):
   chunks = b''

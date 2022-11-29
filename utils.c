@@ -459,3 +459,11 @@ long xstrtol(const char *nptr, char **endptr, int base, int linea, char *file){
 
     return res;
 }
+
+void stampaArrayFile(char **arrayFile, int nFiles, long key){
+  fprintf(stdin, "==== LISTA DI FILE CON CHIAVE %ld ====\n", key);
+  for(int i = 0; i < nFiles; i++){
+    fprintf(stdout, "%s\n", arrayFile[i]);
+  }
+
+}

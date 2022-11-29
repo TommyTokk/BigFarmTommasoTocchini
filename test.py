@@ -2,7 +2,7 @@ dict = {
     1: ["cane", "ciao", "cielo"],
     2: ["domodosola", "duomo"]
 }
-
+print(type(dict.keys()[0]))
 newName = "cielo"
 key = 1
 if (key in dict):

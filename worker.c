@@ -82,7 +82,7 @@ void *WorkerBody(void *args){
     //INVIO DATI DALLA SOCKET
 
     //Invio il tipo di richiesta al collector
-    if(sendInt(socket, 0) < 0){
+    if(sendInt(socket, 1) < 0){
       free(fName);
       free(arrNumR);
       pthread_exit(NULL);
