@@ -11,10 +11,8 @@ Programma (multi-thread) che che prende dalla linea di comando
 una lista di file binari e una serie di parametri.
 
 TO DO:
-1) Creazione corpo della funzione Worker
-  1.1) Sistemare logica per quanto riguarda il nome del file
-  1.2) Sistemare eventuali errori nel worker
-  1.3) Creazione della socket per la comunicazione 
+1) Sistemare la logica degli errori
+2) Controllare eventuali errori in valgrind
 */
 
 

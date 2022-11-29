@@ -4,8 +4,7 @@
 
 /*
 TODO:
-1) Inviare le richieste al server
-    2) Correggere la comunicazione client -> collector
+1) Correggere errori valgrind
 */
 int main(int argc, char *argv[]){
     
