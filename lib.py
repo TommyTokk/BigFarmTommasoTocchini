@@ -31,7 +31,7 @@ def recv_all(conn,n):
     bytes_recd = bytes_recd + len(chunk)
   return chunks
 
-def connectionHandler(conn, addr, dict):
+def connectionHandler(conn, addr, sumDict):
     with conn:  
         print(f"Contattato da {addr}\n")
         # ---- Intero che rappresenta il tipo di richeista
@@ -61,12 +61,12 @@ def connectionHandler(conn, addr, dict):
             print(f"Ho ricevuto {fileName} come nome del file da {addr}\n")
 
             with mutex:
-                if(lSum in dict):
-                    if(fileName not in dict[lSum]):
-                        dict[lSum].append(fileName)
+                if(lSum in sumDict):
+                    if(fileName not in sumDict[lSum]):
+                        sumDict[lSum].append(fileName)
                 else:
-                    dict[lSum] = list()
-                    dict[lSum].append(fileName)
+                    sumDict[lSum] = list()
+                    sumDict[lSum].append(fileName)
         elif req == 2:
             #Al collector arriva la richiesta di elencare i fie con una det. somma
             #Ricevo la somma
@@ -76,7 +76,7 @@ def connectionHandler(conn, addr, dict):
             with mutex:
                 try:
                     fileList = []
-                    fileList = dict[fSum]
+                    fileList = sumDict[fSum]
                     #Invio il numero di file presenti nella lista
                     conn.sendall(s.pack("!i", len(fileList)))
 
@@ -91,29 +91,33 @@ def connectionHandler(conn, addr, dict):
             #Al collector arriva la richiesta di elencare tutte le coppie
             with mutex:
                 #Devo inviare il numero di chiavi nel dict
-                dict = {k: v for k, v in sorted(dict.items(), key=lambda item: item[1])}
-                print(dict)
-                nKeys = len(dict.keys())
-                print(f"Key number: {nKeys}\n")
+                #sumDict = {k: v for k, v in sorted(sumDict.items(), key=lambda item: item[1])}
+                sumDict = dict(sorted(sumDict.items()));
+                print(sumDict)
+                nKeys = len(sumDict.keys())
+                print(f"Invio numero di chiavi: {nKeys}\n")
                 conn.sendall(s.pack("!i", nKeys))
 
                 if(nKeys != 0):
-                    for keys in dict:
+                    for keys in sumDict:
                         print(f"Key: {keys}")
-                        fileList = list(dict.keys())
+                        fileList = sumDict[keys]
                         print(f"File list: {fileList}\n")
-                        print(f'Chiave: {keys}, File List: {fileList}, List length: {len(fileList)}\n')
 
                         #Invio la chiave
+                        print(f"Invio la chiave {keys}\n")
                         conn.sendall(s.pack("!q", keys))
 
                         #Invio il numero di file associati a key
+                        print(f"Invio il numero di file associati a {keys}: {len(fileList)}\n")
                         conn.sendall(s.pack("!i", len(fileList)))
 
                         for file in fileList:
                             #Invio la lunghezza del nome del file
-                            conn.sendall(s.pack("!", len(file)))
+                            print(f"Invio la lunghezza del nome del file: {len(file)}\n")
+                            conn.sendall(s.pack("!i", len(file)))
                             #Invio i file associati alla chiave
+                            print(f"Invio i file associati alla chiave: {file}\n")
                             conn.sendall(file.encode())
 
 def recv_all(conn,n):

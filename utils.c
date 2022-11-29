@@ -426,18 +426,17 @@ int reciveLong(int fdSocket, long *num){
   return 1;
 }
 
-int reciveFileName(int fdSocket, char *str){
-  int e, len;
+int reciveFileName(int fdSocket, char *str, int fileLength){
+  int e;
 
-  if(!str){
+  /*if(!str){
     fprintf(stderr, "Lettura stringa non riuscita, Linea:%d, File: %s\n", __LINE__, __FILE__);
     return -1;
-  }
-  len = strlen(str);
-  e = readn(fdSocket, str, len);
+  }*/
+  e = readn(fdSocket, str, fileLength);
   
   if(e == -1) termina("Lettura nome file fallita", __LINE__, __FILE__);
-  if(e != len){
+  if(e != fileLength){
     fprintf(stderr, "Errore readn, Linea:%d, File: %s\n", __LINE__, __FILE__);
     return -1;
   }
@@ -459,11 +458,17 @@ long xstrtol(const char *nptr, char **endptr, int base, int linea, char *file){
 
     return res;
 }
+void freeArray(char **file, int dim){
+  for(int i = 0; i < dim; i++){
+    free(file[i]);
+  }
+
+  free(file);
+}
 
 void stampaArrayFile(char **arrayFile, int nFiles, long key){
-  fprintf(stdin, "==== LISTA DI FILE CON CHIAVE %ld ====\n", key);
   for(int i = 0; i < nFiles; i++){
-    fprintf(stdout, "%s\n", arrayFile[i]);
+    fprintf(stdout, "%ld | %s\n", key, arrayFile[i]);
   }
 
 }

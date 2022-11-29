@@ -79,8 +79,10 @@ int sendLong(int fdSocket, long num);
 int sendFileName(int fdSocket, char *fileName);
 int reciveInt(int fdSocket, int *num);
 int reciveLong(int fdSocket, long *num);
+int reciveFileName(int fdSocket, char *str, int fileLength);
 
 
 //FUNZIONI CLIENT
 long xstrtol(const char *nptr, char **endptr, int base, int linea, char *file);
+void freeArray(char **file, int dim);
 void stampaArrayFile(char **arrayFile, int nFiles, long key);
