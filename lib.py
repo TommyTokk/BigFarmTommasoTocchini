@@ -51,6 +51,7 @@ def connectionHandler(conn, addr, sumDict):
 
             #Ricevo la lunghezza del file
             data = recv_all(conn, 4)
+            
             assert (len(data)) == 4
             lenFile = s.unpack("!i", data[:4])[0]
 
@@ -58,6 +59,7 @@ def connectionHandler(conn, addr, sumDict):
             data = recv_all(conn, lenFile)
             assert len(data) == lenFile
             fileName = data.decode('utf-8')
+            
             print(f"Ho ricevuto {fileName} come nome del file da {addr}\n")
 
             with mutex:

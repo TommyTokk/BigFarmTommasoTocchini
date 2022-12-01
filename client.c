@@ -2,11 +2,28 @@
 #define HOST "127.0.0.1"
 #define PORT 61813
 
+volatile bool sig = false;
+void handler(int s){
+  if(s==SIGINT) sig = true;
+}
+
 /*
 TODO:
 1) Correggere errori valgrind
 */
 int main(int argc, char *argv[]){
+
+    struct sigaction sa;
+    sa.sa_handler=&handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags=SA_RESTART;
+    sigaction(SIGINT,&sa,NULL);
+
+    //blocco tutti i segnali tranne SIGINT
+    sigset_t mask;
+    sigfillset(&mask);
+    sigdelset(&mask,SIGINT);
+    pthread_sigmask(SIG_BLOCK, &mask,NULL);
     
     //long params;
     int dim = argc - 1;
@@ -61,12 +78,12 @@ int main(int argc, char *argv[]){
             //Carico l'array di file
             for(int j = 0; j < nFiles; j++){
                 //Ricevo la lunghezza del nome del file
-                int lenfile;
+                int lenfile = 0;
 
                 if(reciveInt(socket, &lenfile) < 0) termina("Readn numero di file fallito", __LINE__, __FILE__);
                 //fprintf(stdout,"Ricevuta lunghezza del file :%d\n", lenfile);
                 //Ricevo il nome del file
-                file = malloc(lenfile * sizeof(char));
+                file = malloc((lenfile + 1) * sizeof(char));
                 if(!file) termina("Allocazione memoria file fallita\n", __LINE__, __FILE__);
 
                 if(reciveFileName(socket, file, lenfile) < 0)termina("Lettura file non riuscita", __LINE__, __FILE__); 
@@ -102,11 +119,10 @@ int main(int argc, char *argv[]){
             if(reciveInt(socket, &lenfile) < 0) termina("Readn numero di file fallito", __LINE__, __FILE__);
             //fprintf(stdout,"Ricevuta lunghezza del file :%d\n", lenfile);
             //Ricevo il nome del file
-            file = malloc(lenfile * sizeof(char));
+            file = malloc((lenfile+1) * sizeof(char));
             if(!file) termina("Allocazione memoria file fallita\n", __LINE__, __FILE__);
 
             if(reciveFileName(socket, file, lenfile) < 0)termina("Lettura file non riuscita", __LINE__, __FILE__); 
-            //fprintf(stdout,"Ricevuto file :%s\n", file);
             file[lenfile] = '\0';
             files[j] = file; 
         }

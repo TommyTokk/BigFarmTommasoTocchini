@@ -25,7 +25,6 @@ void handler(int s){
 
 
 int main(int argc, char *argv[]){
-
   //long tmpSum = 0;
   // controlla numero argomenti
   if(argc<2) {

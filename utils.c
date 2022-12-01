@@ -12,6 +12,13 @@ void termina(const char *messaggio, int linea, char *file) {
   exit(1);
 }
 
+void terminaThread(const char *messaggio, int linea, char *file){
+  if(errno==0)  fprintf(stderr,"== %d == %s Linea:%d, File: %s\n",getpid(), messaggio, linea, file);
+  else fprintf(stderr,"== %d == %s: %s\n",getpid(), messaggio,
+              strerror(errno));
+  pthread_exit(NULL);
+}
+
 
 // ---------- operazioni su FILE *
 FILE *xfopen(const char *path, const char *mode, int linea, char *file) {
@@ -434,7 +441,6 @@ int reciveFileName(int fdSocket, char *str, int fileLength){
     return -1;
   }*/
   e = readn(fdSocket, str, fileLength);
-  
   if(e == -1) termina("Lettura nome file fallita", __LINE__, __FILE__);
   if(e != fileLength){
     fprintf(stderr, "Errore readn, Linea:%d, File: %s\n", __LINE__, __FILE__);

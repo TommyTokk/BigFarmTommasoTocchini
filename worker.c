@@ -20,12 +20,14 @@ void *WorkerBody(void *args){
   Data *d = (Data *) args;
   char *fName = malloc(d -> fileName);
 
-  if(!fName) termina("Allocazione memoria nome file fallita", __LINE__, __FILE__);
+  if(!fName) terminaThread("Allocazione memoria nome file fallita", __LINE__, __FILE__);
 
   long *arrNumR = malloc(MAX_LONG * sizeof(long));
 
-  if(!arrNumR) termina("Errore allocazione memoria arrNumR", __LINE__, __FILE__);
-
+  if(!arrNumR){
+    free(fName);
+    terminaThread("Errore allocazione memoria arrNumR", __LINE__, __FILE__);
+  }
   long numRead, sum;
 
   while(true){
@@ -53,7 +55,11 @@ void *WorkerBody(void *args){
     FILE *fin = xfopen(fName, "r", __LINE__, __FILE__);
 
     /*ATTENZIONE DA SISTEMARE*/
-    if(fin == NULL) termina("Apertura file di input per consumer fallita", __LINE__, __FILE__);
+    if(fin == NULL){
+      free(fName);
+      free(arrNumR);
+      terminaThread("Apertura file di input per consumer fallita", __LINE__, __FILE__);
+    }
     /*ATTENZIONE DA SISTEMARE*/
 
     sum = 0;
@@ -106,6 +112,7 @@ void *WorkerBody(void *args){
       pthread_exit(NULL);
     }
 
+    //Invio al collector il nome del file
     if(sendFileName(socket, fName) < 0 ){
       free(fName);
       free(arrNumR);

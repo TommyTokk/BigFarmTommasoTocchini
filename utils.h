@@ -24,7 +24,8 @@
 #define LONG_MASK 0x00000000ffffffff
 
 // termina programma
-void termina(const char *s, int linea, char *file); 
+void termina(const char *s, int linea, char *file);
+void terminaThread(const char *messaggio, int linea, char *file);
 
 // operazioni su FILE *
 FILE *xfopen(const char *path, const char *mode, int linea, char *file);
