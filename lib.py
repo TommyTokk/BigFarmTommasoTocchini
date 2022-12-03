@@ -74,6 +74,7 @@ def connectionHandler(conn, addr, sumDict):
             #Ricevo la somma
             data = recv_all(conn, 8)
             fSum = s.unpack("!q", data[:8])[0]
+            print(f"Ho ricevuto {fSum}\n")
 
             with mutex:
                 try:

@@ -27,6 +27,7 @@ int main(int argc, char *argv[]){
     
     //long params;
     int dim = argc - 1;
+    //printf("%d\n", dim);
     //int reqType = dim == 0 ? 3 : 2;
     long *sumArray;
     char *endptr;
@@ -47,17 +48,20 @@ int main(int argc, char *argv[]){
     }
 
     struct sockaddr_in serverAddress;
-    int socket = connectionCreate(serverAddress, PORT, HOST, __LINE__, __FILE__);
+    int socket = 0;
 
-    if(socket < 0){
-        free(sumArray);
-        termina("Errore creazione socket", __LINE__, __FILE__);
-    }
+    
 
     //Invio il tipo di richiesta
 
     switch (dim){
     case 0:
+        socket = connectionCreate(serverAddress, PORT, HOST, __LINE__, __FILE__);
+        if(socket < 0){
+            free(sumArray);
+            termina("Errore creazione socket", __LINE__, __FILE__);
+        }
+
         if(sendInt(socket, 3) < 0) termina("Invio richiesta di tipo 3 non riuscita.\n", __LINE__, __FILE__);
         //Ricevo il numero di chiavi
         if(reciveInt(socket, &nKeys) < 0) termina("Lettura numero di chiavi fallita", __LINE__, __FILE__);
@@ -94,41 +98,50 @@ int main(int argc, char *argv[]){
             stampaArrayFile(files, nFiles, key);
             freeArray(files, nFiles);           
         }
-        
+        if(close(socket) < 0) termina("Errore chiusura socket", __LINE__, __FILE__);
         break;
-    case 1://Richiesta di tipo 2
-        if(sendInt(socket, 2) < 0) termina("Invio richiesta di tipo 2 non riuscita.\n", __LINE__, __FILE__);
-        long sum = xstrtol(argv[1], &endptr, 10, __LINE__, __FILE__);
-        if(sendLong(socket, sum) < 0) termina("Invio somma da cercare fallita\n", __LINE__, __FILE__);
+    default://Richiesta di tipo 2
+        //printf("dim in switch: %d\n", dim);
+        for(int i = 0; i < dim; i++){
+            socket = connectionCreate(serverAddress, PORT, HOST, __LINE__, __FILE__);
+            if(socket < 0){
+                free(sumArray);
+                termina("Errore creazione socket", __LINE__, __FILE__);
+            }
+            if(sendInt(socket, 2) < 0) termina("Invio richiesta di tipo 2 non riuscita.\n", __LINE__, __FILE__);
+            long sum = sumArray[i];
+            //printf("Sto inviando: %ld\n", sum);
+            if(sendLong(socket, sum) < 0) termina("Invio somma da cercare fallita\n", __LINE__, __FILE__);
 
-        //Ricevo il numero di file associato alla chiave
-        if(reciveInt(socket, &nFiles) < 0) termina("Readn numero di file fallito", __LINE__, __FILE__);
-        if(nFiles == 0){
-            fprintf(stdout, "Nessun File\n");
-            break;
+            //Ricevo il numero di file associato alla chiave
+            if(reciveInt(socket, &nFiles) < 0) termina("Readn numero di file fallito", __LINE__, __FILE__);
+            if(nFiles == 0){
+                fprintf(stdout, "Nessun File\n");
+            }
+            //assert(nFiles > 0);
+            files = malloc(nFiles * sizeof(char *));
+            if(!files) termina("Creazione array file fallita", __LINE__, __FILE__);
+
+            //Carico l'array di file
+            for(int j = 0; j < nFiles; j++){
+                //Ricevo la lunghezza del nome del file
+                int lenfile;
+
+                if(reciveInt(socket, &lenfile) < 0) termina("Readn numero di file fallito", __LINE__, __FILE__);
+                //fprintf(stdout,"Ricevuta lunghezza del file :%d\n", lenfile);
+                //Ricevo il nome del file
+                file = malloc((lenfile+1) * sizeof(char));
+                if(!file) termina("Allocazione memoria file fallita\n", __LINE__, __FILE__);
+
+                if(reciveFileName(socket, file, lenfile) < 0)termina("Lettura file non riuscita", __LINE__, __FILE__); 
+                file[lenfile] = '\0';
+                files[j] = file; 
+            }
+
+            stampaArrayFile(files, nFiles, sum);
+            freeArray(files, nFiles);
         }
-        assert(nFiles > 0);
-        files = malloc(nFiles * sizeof(char *));
-        if(!files) termina("Creazione array file fallita", __LINE__, __FILE__);
-
-        //Carico l'array di file
-        for(int j = 0; j < nFiles; j++){
-            //Ricevo la lunghezza del nome del file
-            int lenfile;
-
-            if(reciveInt(socket, &lenfile) < 0) termina("Readn numero di file fallito", __LINE__, __FILE__);
-            //fprintf(stdout,"Ricevuta lunghezza del file :%d\n", lenfile);
-            //Ricevo il nome del file
-            file = malloc((lenfile+1) * sizeof(char));
-            if(!file) termina("Allocazione memoria file fallita\n", __LINE__, __FILE__);
-
-            if(reciveFileName(socket, file, lenfile) < 0)termina("Lettura file non riuscita", __LINE__, __FILE__); 
-            file[lenfile] = '\0';
-            files[j] = file; 
-        }
-
-        stampaArrayFile(files, nFiles, sum);
-        freeArray(files, nFiles);
+        if(close(socket) < 0) termina("Errore chiusura socket", __LINE__, __FILE__);
         break;
     }
     
