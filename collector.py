@@ -5,6 +5,7 @@ def main(host = HOST, port = PORT):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         dict = {}
         try:  
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((host, port))
             s.listen()
             while True:

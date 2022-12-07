@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
   d.cIndex = &cIndex;
   d.buffer = buff;
   d.buffSize = &buffSize;
-  d.fileName = 266;
+  d.fileName = 256;
   d.cMutex = &cMutex;
   d.sem_free_slots = &sem_free_slots;
   d.sem_data_access = &sem_data_access;
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]){
     xpthread_create(&threads[i],NULL,WorkerBody,&d,__LINE__, __FILE__);
   }
 
-  for(int i = 1; i < argc; i++){
+  for(int i = 1; i < argc && !sig; i++){
     if(stat(argv[i], &filePath) == -1){
       printf("non è un file\n");
       continue;//L'argomento non è un file
