@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
     }
   }
 
-  printf("nThreads = %d, buffSize = %d, delay = %d\n", nThreads, buffSize, delay);
+  //printf("nThreads = %d, buffSize = %d, delay = %d\n", nThreads, buffSize, delay);
 
   pthread_t *threads;
   threads = malloc(nThreads * sizeof(pthread_t));

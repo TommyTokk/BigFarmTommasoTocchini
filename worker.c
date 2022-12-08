@@ -41,7 +41,7 @@ void *WorkerBody(void *args){
       //ATTENZIONE ALLA DIMENSIONE DEL BUFFER
       strcpy(fName, d -> buffer[*(d -> cIndex)]);
       
-      printf("Ho letto %s come nome file\n", fName);
+      //printf("Ho letto %s come nome file\n", fName);
       //ATTENZIONE ALLA DIMENSIONE DEL BUFFER
 
     }
@@ -77,7 +77,7 @@ void *WorkerBody(void *args){
 
     //CREARE LA SOCKET PER LA COMUNICAZIONE
     struct sockaddr_in serverAddress;
-    printf("il nome del file è %s\n", fName);
+    //printf("il nome del file è %s\n", fName);
     int socket = connectionCreate(serverAddress, PORT, HOST, __LINE__, __FILE__);
 
     if(socket < 0){

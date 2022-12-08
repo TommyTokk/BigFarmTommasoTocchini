@@ -9,7 +9,6 @@ def main(host = HOST, port = PORT):
             s.bind((host, port))
             s.listen()
             while True:
-                print("In attesa di un client...")
                 # mi metto in attesa di una connessione
                 conn, addr = s.accept()
                 # lavoro con la connessione appena ricevuta
