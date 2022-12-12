@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from lib import *
 
 
@@ -18,7 +19,6 @@ def main(host = HOST, port = PORT):
                 t.start()
         except KeyboardInterrupt:
             pass
-            print('\nChiusura server....')
             s.shutdown(socket.SHUT_RDWR)
 
 main()

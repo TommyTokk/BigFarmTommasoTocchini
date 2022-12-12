@@ -1,11 +1,11 @@
-#! /usr/bin/python3
+
 import socket, threading
 from threading import Lock
 from time import sleep
 import struct as s
 
 HOST = "127.0.0.1"
-PORT = 61813
+PORT = 57135
 
 mutex = Lock()
 
@@ -42,18 +42,20 @@ def connectionHandler(conn, addr, sumDict):
             data = recv_all(conn, 8)
             assert(len(data) == 8)
             lSum = s.unpack("!q", data[:8])[0]
+            #print(f"Ricevuta somma: {lSum}")
 
 
             #Ricevo la lunghezza del file
             data = recv_all(conn, 4)
-            
             assert (len(data)) == 4
             lenFile = s.unpack("!i", data[:4])[0]
+            #print(f"Ricevuta lunghezza file: {lenFile}")
 
             #Ricevo il file
             data = recv_all(conn, lenFile)
             assert len(data) == lenFile
             fileName = data.decode('utf-8')
+            #print(f"Ricevuta nomeFile: {fileName}")
             
 
             with mutex:

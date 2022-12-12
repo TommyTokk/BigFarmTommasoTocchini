@@ -4,16 +4,8 @@
 
 // parametri del server
 #define HOST "127.0.0.1"
-#define PORT 61813
+#define PORT 57135
 
-/*
-Programma (multi-thread) che che prende dalla linea di comando
-una lista di file binari e una serie di parametri.
-
-TO DO:
-1) Sistemare la logica degli errori
-2) Controllare eventuali errori in valgrind
-*/
 
 
 volatile bool sig = false;
@@ -65,7 +57,7 @@ int main(int argc, char *argv[]){
     }
   }
 
-  //printf("nThreads = %d, buffSize = %d, delay = %d\n", nThreads, buffSize, delay);
+  // printf("nThreads = %d, buffSize = %d, delay = %d\n", nThreads, buffSize, delay);
 
   pthread_t *threads;
   threads = malloc(nThreads * sizeof(pthread_t));
@@ -99,7 +91,7 @@ int main(int argc, char *argv[]){
 
   for(int i = 1; i < argc && !sig; i++){
     if(stat(argv[i], &filePath) == -1){
-      printf("non è un file\n");
+      fprintf(stderr, "non è un file\n");
       continue;//L'argomento non è un file
     }
     //Se argv[i] è un file lo carico nel buffer

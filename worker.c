@@ -2,17 +2,8 @@
 
 
 #define HOST "127.0.0.1"
-#define PORT 61813
-/*
-TODO Worker
-1) Logica per la lettura del nome del file
-  1.1) Aggiungere controlli sulla correttezza del nome
-  1.2) Aggiungere controlli sulla correttezza della lunghezza del buffer 
-  1.3) Aggiungere funzione per inviare i warning 
-2) Connessione tramite socket per lo scambio di dati
-  2.1) Aggiungere logica per lo scambio dati
-  2.2) Aggiungere controllo degli errori
-*/
+#define PORT 57135
+
 
 
 

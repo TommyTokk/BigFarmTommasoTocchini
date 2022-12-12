@@ -464,17 +464,16 @@ long xstrtol(const char *nptr, char **endptr, int base, int linea, char *file){
 
     return res;
 }
+
 void freeArray(char **file, int dim){
   for(int i = 0; i < dim; i++){
     free(file[i]);
   }
-
   free(file);
 }
 
 void stampaArrayFile(char **arrayFile, int nFiles, long key){
   for(int i = 0; i < nFiles; i++){
-    fprintf(stdout, "%ld | %s\n", key, arrayFile[i]);
+    fprintf(stdout, "%ld  %s\n", key, arrayFile[i]);
   }
-
 }

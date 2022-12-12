@@ -1,16 +1,12 @@
 #include "utils.h"
 #define HOST "127.0.0.1"
-#define PORT 61813
+#define PORT 57135
 
 volatile bool sig = false;
 void handler(int s){
   if(s==SIGINT) sig = true;
 }
 
-/*
-TODO:
-1) Correggere errori valgrind
-*/
 int main(int argc, char *argv[]){
 
     struct sigaction sa;
