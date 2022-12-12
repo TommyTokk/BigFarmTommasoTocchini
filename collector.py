@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 from lib import *
 
-
 def main(host = HOST, port = PORT):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         dict = {}
